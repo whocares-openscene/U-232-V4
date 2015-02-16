@@ -476,4 +476,24 @@ function clr_forums_cache($post_id) {
         $uclass++;
     }
 }
+function create_torrent_pass($uid, $hash) {
+	global $INSTALLER09;
+	$xbt_config = mysqli_fetch_row(sql_query("SELECT value FROM xbt_config WHERE name='torrent_pass_private_key'")) or sqlerr(__FILE__, __LINE__);
+	$site_key = $xbt_config['0']; // the value of torrent_pass_private_key that is stored in the xbt_config table
+	$user = mysqli_fetch_row(sql_query("SELECT * FROM users WHERE id=$uid");)
+	$torrent_pass_version = $user['torrent_pass_version']; // the torrent_pass_version that is stored in the users table for the user in question
+	$passkey = sprintf('%08x%s', $uid, substr(sha1(sprintf('%s %d %d %s', $site_key, $torrent_pass_version, $uid, $hash)) , 0, 24));
+	$user['torrent_pass'] = $passkey;
+	sql_query('UPDATE users SET torrent_pass=' . sqlesc($user['torrent_pass']) . 'WHERE id=' . sqlesc($user['id'])) or sqlerr(__FILE__, __LINE__);
+	$mc1->begin_transaction('MyUser_' . $user['id']);
+	$mc1->update_row(false, array(
+	'torrent_pass' => $user['torrent_pass']
+	));
+	$mc1->commit_transaction($INSTALLER09['expires']['curuser']);
+	$mc1->begin_transaction('user' . $user['id']);
+	$mc1->update_row(false, array(
+	'torrent_pass' => $user['torrent_pass']
+	));
+	$mc1->commit_transaction($INSTALLER09['expires']['user_cache']);
+}
 ?>
