@@ -29,6 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cats = isset($_POST['cats']) ? array_map('mkint', $_POST['cats']) : array();
     if (count($cats) == 0) stderr($lang['getrss_error'], $lang['getrss_nocat']);
     $feed = isset($_POST['feed']) && $_POST['feed'] == 'dl' ? 'dl' : 'web';
+    if (!isset($CURUSER['torrent_pass']) || strlen($CURUSER['torrent_pass']) != 32) {
+    	create_torrent_pass($CURUSER['id']);
+    }
     $rsslink = $INSTALLER09['baseurl'] . '/rss.php?cats=' . join(',', $cats) . ($feed == 'dl' ? '&amp;type=dl' : '') . '&amp;torrent_pass=' . $CURUSER['torrent_pass'];
     $HTMLOUT = "<div align=\"center\"><h2>{$lang['getrss_result']}</h2><br/>
 		<input type=\"text\" size=\"120\" readonly=\"readonly\" value=\"{$rsslink}\" onclick=\"select()\" />
