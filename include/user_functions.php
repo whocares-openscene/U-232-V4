@@ -476,7 +476,7 @@ function clr_forums_cache($post_id) {
         $uclass++;
     }
 }
-function create_torrent_pass($uid, $hash) {
+function create_torrent_pass($uid, $hash = 'b5b433248012696c49e197d619efb0d13af79d0c') {
 	global $INSTALLER09;
 	$xbt_config = mysqli_fetch_row(sql_query("SELECT value FROM xbt_config WHERE name='torrent_pass_private_key'")) or sqlerr(__FILE__, __LINE__);
 	$site_key = $xbt_config['0']; // the value of torrent_pass_private_key that is stored in the xbt_config table
