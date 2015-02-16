@@ -484,7 +484,9 @@ if ((isset($_POST['action'])) && ($_POST['action'] == "edituser")) {
     //== Reset Torrent pass
     if ((isset($_POST['reset_torrent_pass'])) && ($_POST['reset_torrent_pass'])) {
         $newpasskeyversion = ($user['torrent_pass_version'] + 1);
-        $newpasskey = md5($user['username'] . TIME_NOW . $user['passhash']);
+        $xbt_config = mysqli_fetch_row(sql_query("SELECT value FROM xbt_config WHERE name='torrent_pass_private_key'")) or sqlerr(__FILE__, __LINE__);
+	$site_key = $xbt_config['0']; // the value of torrent_pass_private_key that is stored in the xbt_config table
+        $newpasskey = sprintf('%08x%s', $user['id'], substr(sha1(sprintf('%s %d %d %s', $site_key, $newpasskeyversion, $user['id'], 'b5b433248012696c49e197d619efb0d13af79d0c')) , 0, 24));
         $modcomment = get_date(TIME_NOW, 'DATE', 1) . "{$lang['modtask_passkey']}" . sqlesc($user['torrent_pass']) . "{$lang['modtask_reset']}" . sqlesc($newpasskey) . "{$lang['modtask_by']}" . $CURUSER['username'] . ".\n" . $modcomment;
         $curuser_cache['torrent_pass'] = $newpasskey;
         $user_cache['torrent_pass'] = $newpasskey;
