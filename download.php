@@ -113,24 +113,7 @@ $mc1->delete_value('top5_tor_');
 $mc1->delete_value('last5_tor_');
 $mc1->delete_value('scroll_tor_');
 if (!isset($CURUSER['torrent_pass']) || strlen($CURUSER['torrent_pass']) != 32) {
-    $xbt_config = mysqli_fetch_row(sql_query("SELECT value FROM xbt_config WHERE name='torrent_pass_private_key'")) or sqlerr(__FILE__, __LINE__);
-    $site_key = $xbt_config['0']; // the value of torrent_pass_private_key that is stored in the xbt_config table
-    $info_hash = $row['info_hash']; // the torrent info_hash
-    $torrent_pass_version = $CURUSER['torrent_pass_version']; // the torrent_pass_version that is stored in the users table for the user in question
-    $uid = $CURUSER['id']; // the uid (userid) in the users table for the user in question
-    $passkey = sprintf('%08x%s', $uid, substr(sha1(sprintf('%s %d %d %s', $site_key, $torrent_pass_version, $uid, $info_hash)) , 0, 24));
-    $CURUSER['torrent_pass'] = $passkey;
-    sql_query('UPDATE users SET torrent_pass=' . sqlesc($CURUSER['torrent_pass']) . 'WHERE id=' . sqlesc($CURUSER['id'])) or sqlerr(__FILE__, __LINE__);
-    $mc1->begin_transaction('MyUser_' . $CURUSER['id']);
-    $mc1->update_row(false, array(
-        'torrent_pass' => $CURUSER['torrent_pass']
-    ));
-    $mc1->commit_transaction($INSTALLER09['expires']['curuser']);
-    $mc1->begin_transaction('user' . $CURUSER['id']);
-    $mc1->update_row(false, array(
-        'torrent_pass' => $CURUSER['torrent_pass']
-    ));
-    $mc1->commit_transaction($INSTALLER09['expires']['user_cache']);
+    create_torrent_pass($CURUSER['id'],$row['info_hash']);
 }
 $dict = bencdec::decode_file($fn, $INSTALLER09['max_torrent_size']);
 if (XBT_TRACKER == true) {
